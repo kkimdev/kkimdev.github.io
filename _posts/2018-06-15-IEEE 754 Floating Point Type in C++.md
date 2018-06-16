@@ -6,7 +6,16 @@ redirect_from:
 ---
 Let's say we want to use IEEE 754 32/64bit floating point types in C++, then there is `float` and `double` right?  Unfortunately, C++ standard guarantees almost nothing about the built-in floating point types.
 
-> [§ 6.7.1.8](http://eel.is/c++draft/basic.fundamental#8) There are three floating-point types: float, double, and long double. The type double provides at least as much precision as float, and the type long double provides at least as much precision as double. The set of values of the type float is a subset of the set of values of the type double; the set of values of the type double is a subset of the set of values of the type long double. **The value representation of floating-point types is implementation-defined**. ...
+```c++
+void f() {
+
+}
+```
+
+`void f()`{:.language=c++}
+
+<span style="font-family:'Material Icons'">open_in_new</span>
+> [§ 6.7.1.8 ](http://eel.is/c++draft/basic.fundamental#8){:target="_blank"} There are three floating-point types: float, double, and long double. The type double provides at least as much precision as float, and the type long double provides at least as much precision as double. The set of values of the type float is a subset of the set of values of the type double; the set of values of the type double is a subset of the set of values of the type long double. **The value representation of floating-point types is implementation-defined**. ...
 
 So are we just doomed? No! There is [std::numeric_limits](http://en.cppreference.com/w/cpp/types/numeric_limits) that gives various floating point type trait information, and neat C++ compile time tricks we can use to craft a clean type API. So let's try. The goal is to construct the following IEEE754 floating point types.
 
