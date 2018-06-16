@@ -1,5 +1,5 @@
 ---
-title: "[C++] I don't trust floating point type - Overengineering Series #1"
+title: "[C++] IEEE 754 point type - Overengineering Series #1"
 ---
 Let's say we want to use IEEE 754 32/64bit floating point types in C++, then there are `float` and `double` right?  Unfortunately, C++ standard guarantees almost nothing about the built-in floating point types.
 
