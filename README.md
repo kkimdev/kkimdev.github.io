@@ -7,3 +7,9 @@ gem install jekyll bundler
 jekyll new ./
 bundle exec jekyll serve
 ```
+
+# Update
+
+```bash
+bundle update
+```
