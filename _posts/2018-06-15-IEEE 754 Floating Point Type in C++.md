@@ -4,7 +4,7 @@ redirect_from:
   - /posts/2018/06/15/C++-IEEE-754-floating-point-type-Overengineering-Series-1.html
   - /posts/2018/06/15/IEEE-754-Floating-Point-Type-in-C++-Overengineering-Series-1.html
 ---
-Let's say we want to use IEEE 754 32/64bit floating point types in C++, then there are `float` and `double` right?  Unfortunately, C++ standard guarantees almost nothing about the built-in floating point types.
+Let's say we want to use IEEE 754 32/64bit floating point types in C++, then there is `float` and `double` right?  Unfortunately, C++ standard guarantees almost nothing about the built-in floating point types.
 
 > § 6.7.1.8 There are three floating-point types: float, double, and long double. The type double provides at least as much precision as float, and the type long double provides at least as much precision as double. The set of values of the type float is a subset of the set of values of the type double; the set of values of the type double is a subset of the set of values of the type long double. **The value representation of floating-point types is implementation-defined**. ...
 
