@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "I don't trust floating point type - Overengineering Series #1"
+title:  "[C++] I don't trust floating point type - Overengineering Series #1"
 date:   2018-06-15
 categories: posts
 ---
