@@ -196,6 +196,5 @@ void tests() {
 
 Again, all the checks are done at compile time, `static_assert`, so we don't need to call `test()`, and just have to ensure that `test_if_type_exists` functions are instantiated.  If a type doesn't exists (i.e., 16 and 128 size types in most systems) then `if constexpr` will simply discard the checks.
 
-The full implementation is available in this repository <https://github.com/kkimdev/ieee754-types> .
+I hope you had fun, like I did. The full implementation is available in this repository <https://github.com/kkimdev/ieee754-types> .
 
-I hope you had fun, like I did.  I'm not sure when I will write the next overengineering series, but I'm thinking "I don't trust floating point computations" as the next topic. :)
