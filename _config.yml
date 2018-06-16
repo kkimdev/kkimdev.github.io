@@ -13,6 +13,8 @@ facebook_username: kkimdev
 
 markdown: kramdown
 theme: minima
+plugins:
+  - jekyll-feed
 
 google_analytics: UA-120931282-1
 
