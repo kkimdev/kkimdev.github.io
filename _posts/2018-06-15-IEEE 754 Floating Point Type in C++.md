@@ -153,7 +153,6 @@ Clearly, the `if constexpr` version is simpler and a lot more readable, and I ex
 Lastly, we introduce another type layer to cause a compile error with a nice error message, in case the requested type is not available, i.e., `BinaryFloatOrVoid` is `void`.
 
 ```c++
-
 template <typename T>
 struct AssertTypeFound {
   static_assert(
