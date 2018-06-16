@@ -21,6 +21,7 @@ email: kk1674@nyu.edu
 #   Google search results) and in your feed.xml site description.
 baseurl: "/" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
+
 github_username:  kkimdev
 linkedin_username: kkimdev
 youtube_username: channel/UCFjh-t8vgQxkxAvhOd1byzw/
@@ -31,8 +32,8 @@ google_analytics: UA-120931282-1
 # Build settings
 markdown: kramdown
 theme: minima
-plugins:
-  - jekyll-feed
+# plugins:
+  # - jekyll-feed
 
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
