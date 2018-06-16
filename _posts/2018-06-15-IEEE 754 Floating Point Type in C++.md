@@ -72,7 +72,7 @@ constexpr int get_mantissa_bits() {
 }
 ```
 
-For the mantissa bits, the leading bit is implicit so we need to subtract 1.  For the exponent bits, there is no direct property available in `std::numeric_limits` so we calculate the minimum number of bits required to represent its exponent range.
+For the mantissa bits, the leading bit is implicit so we need to subtract 1.  For the exponent bits, there is no direct property available in `std::numeric_limits` so instead we calculate the minimum number of bits required to represent its exponent range.
 
 Now, we have everything needed to figure out if the given `T` is the type we're looking for.  The next step is to automatically select such type among the built-in floating point types, `float`, `double`, and `long double`, given the size in bits, e.g., 32, 64. This is where it gets interesting.
 
