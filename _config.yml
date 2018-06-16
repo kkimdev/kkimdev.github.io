@@ -28,3 +28,11 @@ defaults:
     values:
       layout: post
       category: posts
+
+# TODO: Show line number for code blocks/
+#       The following works, but too much space for line numbers/
+# https://github.com/mmistakes/minimal-mistakes/issues/1437
+# kramdown:
+#   syntax_highlighter_opts:
+#     block:
+#       line_numbers: true
