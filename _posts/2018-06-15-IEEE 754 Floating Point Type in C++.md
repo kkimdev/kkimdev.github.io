@@ -29,7 +29,7 @@ int main() {
 
 Well, I guess a natural question at this point is: "Do we really need this? Can't we just assume `float` and `double` are IEEE 754 because they actually are for the 99.9% systems out there?". I thought so, but then later, I've found that people have submitted related proposals, [N1703](http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1703.pdf), [N3626](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3626.pdf), to C/C++ standards committes to fix this issue with additional standard types, `float16_t`, `float32_t`, `float64_t`, and `float128_t`. So maybe it's not entirely pointless afterall.  Anyways, let's get started.
 
-First, let's check if a given type, `T`, satisfies the IEEE 754 floating point requirements and other desired conditions.
+First, let's begin with checking if a given type, `T`, fullfills IEEE 754 and other desired conditions.
 
 ```c++
 template <int storage_bits, int exponent_bits, int mantissa_bits>
@@ -76,7 +76,7 @@ For the mantissa bits, the leading bit is implicit so we need to subtract 1.  Fo
 
 Now, we have everything needed to figure out if the given `T` is the type we're looking for.  The next step is to automatically select such type among the built-in floating point types, `float`, `double`, and `long double`, given the size in bits, e.g., 32, 64. This is where it gets interesting.
 
-The following `find_type()` recursive function selects a type among `T` and `Ts` that satisfies the condition `C`. In our case, `T` and `Ts` are `float, double, long double`, and `C` is the struct we defined before, `Is_Ieee754_2008_Binary_Interchange_Format<storage_bits, exponent_bits, storage_bits, mantissa_bits>`.
+The following `find_type()` recursive function selects a type among `T` and `Ts` that satisfies the condition `C`. In our case, `T` and `Ts` are `float, double, long double`, and `C` is the struct we defined previously, `Is_Ieee754_2008_Binary_Interchange_Format<storage_bits, exponent_bits, storage_bits, mantissa_bits>`.
 
 ```c++
 template <typename C, typename T, typename... Ts>
