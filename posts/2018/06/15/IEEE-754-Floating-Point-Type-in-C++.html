@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>IEEE 754 Floating Point Type in C++ | Kibeom Kim</title>
+<meta name="generator" content="Jekyll v3.8.3" />
+<meta property="og:title" content="IEEE 754 Floating Point Type in C++" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Let’s say we want to use IEEE 754 32/64bit floating point types in C++, then there is float and double right? Unfortunately, C++ standard guarantees almost nothing about the built-in floating point types." />
+<meta property="og:description" content="Let’s say we want to use IEEE 754 32/64bit floating point types in C++, then there is float and double right? Unfortunately, C++ standard guarantees almost nothing about the built-in floating point types." />
+<link rel="canonical" href="https://kkimdev.github.io/posts/2018/06/15/IEEE-754-Floating-Point-Type-in-C++.html" />
+<meta property="og:url" content="https://kkimdev.github.io/posts/2018/06/15/IEEE-754-Floating-Point-Type-in-C++.html" />
+<meta property="og:site_name" content="Kibeom Kim" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-06-15T00:00:00+00:00" />
+<script type="application/ld+json">
+{"datePublished":"2018-06-15T00:00:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://kkimdev.github.io/posts/2018/06/15/IEEE-754-Floating-Point-Type-in-C++.html"},"@type":"BlogPosting","url":"https://kkimdev.github.io/posts/2018/06/15/IEEE-754-Floating-Point-Type-in-C++.html","headline":"IEEE 754 Floating Point Type in C++","description":"Let’s say we want to use IEEE 754 32/64bit floating point types in C++, then there is float and double right? Unfortunately, C++ standard guarantees almost nothing about the built-in floating point types.","dateModified":"2018-06-15T00:00:00+00:00","@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://kkimdev.github.io/feed.xml" title="Kibeom Kim" /><script>
+if(!(window.doNotTrack === "1" || navigator.doNotTrack === "1" || navigator.doNotTrack === "yes" || navigator.msDoNotTrack === "1")) {
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-120931282-1', 'auto');
+  ga('send', 'pageview');
+}
+</script>
+  
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Kibeom Kim</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">IEEE 754 Floating Point Type in C++</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2018-06-15T00:00:00+00:00" itemprop="datePublished">Jun 15, 2018
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Let’s say we want to use IEEE 754 32/64bit floating point types in C++, then there is <code class="highlighter-rouge">float</code> and <code class="highlighter-rouge">double</code> right?  Unfortunately, C++ standard guarantees almost nothing about the built-in floating point types.</p>
+
+<blockquote>
+  <p><a href="http://eel.is/c++draft/basic.fundamental#8">§ 6.7.1.8</a> There are three floating-point types: float, double, and long double. The type double provides at least as much precision as float, and the type long double provides at least as much precision as double. The set of values of the type float is a subset of the set of values of the type double; the set of values of the type double is a subset of the set of values of the type long double. <strong>The value representation of floating-point types is implementation-defined</strong>. …</p>
+</blockquote>
+
+<p>So are we just doomed? No! There is <a href="http://en.cppreference.com/w/cpp/types/numeric_limits">std::numeric_limits</a> that gives various floating point type trait information, and neat C++ compile time tricks we can use to craft a clean type API. So let’s try. The goal is to construct the following IEEE754 floating point types.</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;iostream&gt;
+#include "ieee754_types.hpp"
+</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">IEEE_754_2008_Binary</span><span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">;</span>
+  <span class="n">IEEE_754_2008_Binary</span><span class="o">&lt;</span><span class="mi">64</span><span class="o">&gt;</span> <span class="n">y</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">;</span>
+
+  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+  <span class="c1">// Compile time error if the requested type doesn't exist in the system.</span>
+  <span class="c1">// IEEE_754_2008_Binary&lt;16&gt; z;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">IEEE_754_2008_Binary&lt;n&gt;</code> is n-bit IEEE 754 floating point type. Of course, for most systems, <code class="highlighter-rouge">IEEE_754_2008_Binary&lt;32&gt;</code> is <code class="highlighter-rouge">float</code> and <code class="highlighter-rouge">IEEE_754_2008_Binary&lt;64&gt;</code> is <code class="highlighter-rouge">double</code>.  In case the requested type is not available, like <code class="highlighter-rouge">IEEE_754_2008_Binary&lt;16&gt;</code>, it should cause a compile error with a clear error message.</p>
+
+<p>Well, I guess a natural question at this point is: “Do we really need this? Can’t we just assume <code class="highlighter-rouge">float</code> and <code class="highlighter-rouge">double</code> are IEEE 754 because they actually are for the 99.9% systems out there?”. I thought so, but then later, I’ve found that people have submitted related proposals, <a href="http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1703.pdf">N1703</a>, <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3626.pdf">N3626</a>, to C/C++ standards committes to fix this issue with additional standard types, <code class="highlighter-rouge">float16_t</code>, <code class="highlighter-rouge">float32_t</code>, <code class="highlighter-rouge">float64_t</code>, and <code class="highlighter-rouge">float128_t</code>. So maybe it’s not entirely pointless afterall.  Anyways, let’s get started.</p>
+
+<p>First, let’s begin with checking if a given type, <code class="highlighter-rouge">T</code>, fullfills IEEE 754 and other desired conditions.</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="kt">int</span> <span class="n">storage_bits</span><span class="p">,</span> <span class="kt">int</span> <span class="n">exponent_bits</span><span class="p">,</span> <span class="kt">int</span> <span class="n">mantissa_bits</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="n">Is_Ieee754_2008_Binary_Interchange_Format</span> <span class="p">{</span>
+  <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+  <span class="k">static</span> <span class="k">constexpr</span> <span class="kt">bool</span> <span class="n">value</span> <span class="o">=</span>
+      <span class="o">::</span><span class="n">std</span><span class="o">::</span><span class="n">is_floating_point</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">()</span>            <span class="o">&amp;&amp;</span>
+      <span class="o">::</span><span class="n">std</span><span class="o">::</span><span class="n">numeric_limits</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">is_iec559</span>      <span class="o">&amp;&amp;</span>
+      <span class="o">::</span><span class="n">std</span><span class="o">::</span><span class="n">numeric_limits</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">radix</span> <span class="o">==</span> <span class="mi">2</span>     <span class="o">&amp;&amp;</span>
+      <span class="n">get_storage_bits</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">()</span> <span class="o">==</span> <span class="n">storage_bits</span>    <span class="o">&amp;&amp;</span>
+      <span class="n">get_exponent_bits</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">()</span> <span class="o">==</span> <span class="n">exponent_bits</span>  <span class="o">&amp;&amp;</span>
+      <span class="n">get_mantissa_bits</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">()</span> <span class="o">==</span> <span class="n">mantissa_bits</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>We used <a href="https://en.cppreference.com/w/cpp/language/variable_template">variable template</a> for the type dependent boolean value computation, and also wrapped by a template struct so that we can pass it around easily as a type template parameter later.</p>
+
+<p>First, we check if <code class="highlighter-rouge">T</code> compiles IEEE 754 (equivalently, <a href="https://www.iso.org/standard/57469.html">IEC 60559</a>) with <a href="https://en.cppreference.com/w/cpp/types/numeric_limits/is_iec559"><code class="highlighter-rouge">std::is_iec559</code></a>.  We should also check <code class="highlighter-rouge">radix == 2</code> since IEEE 754 defines two types of floating points, binary and decimal. Finally, we check if <code class="highlighter-rouge">T</code> has the requested number of storage(width), exponent, and mantissa bits. IEEE 754 defines the standard number of exponent and mantissa bits for certain sizes, 16, 32, 64, 128, 160, …, but it also allows implementations to have arbitrary sizes and bits (e.g., <a href="https://en.wikipedia.org/wiki/Extended_precision#x86_extended_precision_format">x86 extended precision format</a>), so we need to check that if <code class="highlighter-rouge">T</code> has the exact format we want.</p>
+
+<p>We can calculate the number of bits of <code class="highlighter-rouge">T</code> with the following simple compile time functions.</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">constexpr</span> <span class="kt">int</span> <span class="n">get_storage_bits</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="n">CHAR_BIT</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">constexpr</span> <span class="kt">int</span> <span class="n">get_exponent_bits</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kt">int</span> <span class="n">exponent_range</span> <span class="o">=</span> <span class="o">::</span><span class="n">std</span><span class="o">::</span><span class="n">numeric_limits</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">max_exponent</span> <span class="o">-</span>
+                       <span class="o">::</span><span class="n">std</span><span class="o">::</span><span class="n">numeric_limits</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">min_exponent</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">bits</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">while</span> <span class="p">((</span><span class="n">exponent_range</span> <span class="o">&gt;&gt;</span> <span class="n">bits</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">++</span><span class="n">bits</span><span class="p">;</span>
+  <span class="k">return</span> <span class="n">bits</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">constexpr</span> <span class="kt">int</span> <span class="n">get_mantissa_bits</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="o">::</span><span class="n">std</span><span class="o">::</span><span class="n">numeric_limits</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">digits</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>For the mantissa bits, the leading bit is implicit so we need to subtract 1.  For the exponent bits, there is no direct property available in <code class="highlighter-rouge">std::numeric_limits</code> so instead we calculate the minimum number of bits required to represent its exponent range.</p>
+
+<p>Now, we have everything needed to figure out if the given <code class="highlighter-rouge">T</code> is the type we’re looking for.  The next step is to automatically select such type among the built-in floating point types, <code class="highlighter-rouge">float</code>, <code class="highlighter-rouge">double</code>, and <code class="highlighter-rouge">long double</code>, given the size in bits, e.g., 32, 64. This is where it gets interesting.</p>
+
+<p>The following <code class="highlighter-rouge">find_type()</code> recursive function selects a type among <code class="highlighter-rouge">T</code> and <code class="highlighter-rouge">Ts</code> that satisfies the condition <code class="highlighter-rouge">C</code>. In our case, <code class="highlighter-rouge">T</code> and <code class="highlighter-rouge">Ts</code> are <code class="highlighter-rouge">float, double, long double</code>, and <code class="highlighter-rouge">C</code> is the struct we defined previously, <code class="highlighter-rouge">Is_Ieee754_2008_Binary_Interchange_Format&lt;storage_bits, exponent_bits, storage_bits, mantissa_bits&gt;</code>.</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">C</span><span class="p">,</span> <span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">Ts</span><span class="o">&gt;</span>
+<span class="k">constexpr</span> <span class="k">auto</span> <span class="n">find_type</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">throw</span><span class="p">;</span>
+
+  <span class="k">if</span> <span class="nf">constexpr</span> <span class="p">(</span><span class="n">C</span><span class="o">::</span><span class="k">template</span> <span class="n">value</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">T</span><span class="p">();</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nf">constexpr</span> <span class="p">(</span><span class="k">sizeof</span><span class="p">...(</span><span class="n">Ts</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">find_type</span><span class="o">&lt;</span><span class="n">C</span><span class="p">,</span> <span class="n">Ts</span><span class="p">...</span><span class="o">&gt;</span><span class="p">();</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kt">void</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">typename... Ts</code> is a <a href="https://en.cppreference.com/w/cpp/language/parameter_pack">parameter pack</a> that can match any number of types. So <code class="highlighter-rouge">T</code> will be <code class="highlighter-rouge">float</code> and <code class="highlighter-rouge">Ts</code> will be <code class="highlighter-rouge">double, long double</code>. The first if condition, <code class="highlighter-rouge">C::template value&lt;T&gt;</code> checks if <code class="highlighter-rouge">T</code> satisfies the condition given by <code class="highlighter-rouge">C</code>, if so, it returns a default instance of <code class="highlighter-rouge">T</code>.  The second if condition, <code class="highlighter-rouge">sizeof...(Ts) &gt;= 1</code>, checks if there are more types in <code class="highlighter-rouge">Ts</code> to exam, if so, it recursively calls itself, <code class="highlighter-rouge">find_function()</code>, with <code class="highlighter-rouge">Ts</code> to continue the search. Finally, if there is nothing in <code class="highlighter-rouge">Ts</code>, it returns a void instance.</p>
+
+<p>Note that since the return type of <code class="highlighter-rouge">find_type()</code> is <code class="highlighter-rouge">auto</code>, the return type will be deduced to what <code class="highlighter-rouge">find_type()</code> returns at compile time. In addition, <a href="http://en.cppreference.com/w/cpp/language/if#Constexpr_If"><code class="highlighter-rouge">if constexpr</code></a> discards the unused conditional paths at compile time, so even though <code class="highlighter-rouge">find_type()</code> has multiple return statements with different types, it compiles successfully.</p>
+
+<p>Since <code class="highlighter-rouge">find_type()</code>’s return type is what we need, we can do <code class="highlighter-rouge">decltype(find_type&lt;...&gt;())</code> to get that. The statement <code class="highlighter-rouge">throw;</code> at the first line of <code class="highlighter-rouge">find_type()</code> is not necessary but it’s there to indicate that <code class="highlighter-rouge">find_type()</code> is not supposed to be called directly.</p>
+
+<p>The following code defines <code class="highlighter-rouge">BinaryFloatOrVoid</code> type using <code class="highlighter-rouge">decltype(find_type&lt;...&gt;())</code>. The newly defined type, <code class="highlighter-rouge">BinaryFloatOrVoid</code>, will be a IEEE754 floating point type that matches the given storage, exponent, and mantissa bits, or <code class="highlighter-rouge">void</code> if the search fails.</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="k">template</span> <span class="o">&lt;</span><span class="kt">int</span> <span class="n">storage_bits</span><span class="p">,</span>
+          <span class="kt">int</span> <span class="n">exponent_bits</span> <span class="o">=</span>
+              <span class="n">standard_binary_interchange_format_exponent_bits</span><span class="o">&lt;</span><span class="n">storage_bits</span><span class="o">&gt;</span><span class="p">(),</span>
+          <span class="kt">int</span> <span class="n">mantissa_bits</span> <span class="o">=</span>
+              <span class="n">standard_binary_interchange_format_mantissa_bits</span><span class="o">&lt;</span><span class="n">storage_bits</span><span class="o">&gt;</span><span class="p">()</span><span class="o">&gt;</span>
+<span class="k">using</span> <span class="n">BinaryFloatOrVoid</span> <span class="o">=</span>
+    <span class="k">decltype</span><span class="p">(</span><span class="n">find_type</span><span class="o">&lt;</span>                                                <span class="c1">//</span>
+             <span class="n">Is_Ieee754_2008_Binary_Interchange_Format</span><span class="o">&lt;</span><span class="n">storage_bits</span><span class="p">,</span>   <span class="c1">//</span>
+                                                       <span class="n">exponent_bits</span><span class="p">,</span>  <span class="c1">//</span>
+                                                       <span class="n">mantissa_bits</span><span class="o">&gt;</span><span class="p">,</span>
+             <span class="kt">float</span><span class="p">,</span> <span class="kt">double</span><span class="p">,</span> <span class="kt">long</span> <span class="kt">double</span><span class="o">&gt;</span><span class="p">());</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">standard_binary_interchange_format_exponent_bits()</code> and <code class="highlighter-rouge">standard_binary_interchange_format_mantissa_bits()</code> functions just return the number of standard exponent and mantissa bits respectively, and we set them as the default values for <code class="highlighter-rouge">exponent_bits</code> and <code class="highlighter-rouge">mantissa_bits</code> for convinience. I will omit their actual implementations as it’s pretty straightfoward and uninteresting.</p>
+
+<p>Traditionally, before <code class="highlighter-rouge">if constexpr</code> was available in C++17, this kind of compile time type manipulation was implemented with <a href="https://en.wikipedia.org/wiki/Substitution_failure_is_not_an_error">SFINAE</a>. The following code shows how it can be done in that way.</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Recursion termination.  Type not found.</span>
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">C</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">Ts</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="n">FindType</span> <span class="p">{</span>
+  <span class="k">using</span> <span class="n">type</span> <span class="o">=</span> <span class="kt">void</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="c1">// Recursion</span>
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">C</span><span class="p">,</span> <span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">Ts</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="n">FindType</span><span class="o">&lt;</span><span class="n">C</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">Ts</span><span class="p">...</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="c1">// Set `type = T` if T satisfies the condition, C.  Otherwise, keep</span>
+  <span class="c1">// searching in the remaining types, Ts... .</span>
+  <span class="k">using</span> <span class="n">type</span> <span class="o">=</span> <span class="o">::</span><span class="n">std</span><span class="o">::</span><span class="n">conditional_t</span><span class="o">&lt;</span>  <span class="c1">//</span>
+      <span class="n">C</span><span class="o">::</span><span class="k">template</span> <span class="n">value</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span> <span class="n">FindType</span><span class="o">&lt;</span><span class="n">C</span><span class="p">,</span> <span class="n">Ts</span><span class="p">...</span><span class="o">&gt;::</span><span class="n">type</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="kt">int</span> <span class="n">storage_bits</span><span class="p">,</span>
+          <span class="kt">int</span> <span class="n">exponent_bits</span> <span class="o">=</span>
+              <span class="n">standard_binary_interchange_format_exponent_bits</span><span class="o">&lt;</span><span class="n">storage_bits</span><span class="o">&gt;</span><span class="p">(),</span>
+          <span class="kt">int</span> <span class="n">mantissa_bits</span> <span class="o">=</span>
+              <span class="n">standard_binary_interchange_format_mantissa_bits</span><span class="o">&lt;</span><span class="n">storage_bits</span><span class="o">&gt;</span><span class="p">()</span><span class="o">&gt;</span>
+<span class="k">using</span> <span class="n">BinaryFloatOrVoid</span> <span class="o">=</span> <span class="k">typename</span> <span class="n">FindType</span><span class="o">&lt;</span>                  <span class="c1">//</span>
+    <span class="n">Is_Ieee754_2008_Binary_Interchange_Format</span><span class="o">&lt;</span><span class="n">storage_bits</span><span class="p">,</span>   <span class="c1">//</span>
+                                              <span class="n">exponent_bits</span><span class="p">,</span>  <span class="c1">//</span>
+                                              <span class="n">mantissa_bits</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="kt">float</span><span class="p">,</span> <span class="kt">double</span><span class="p">,</span> <span class="kt">long</span> <span class="kt">double</span><span class="o">&gt;::</span><span class="n">type</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Clearly, the <code class="highlighter-rouge">if constexpr</code> version is simpler and a lot more readable, and I expect to see less of the SFINAE mess thanks to <code class="highlighter-rouge">if constexpr</code> (and hopefully <a href="https://en.wikipedia.org/wiki/Concepts_(C%2B%2B)">concepts</a>) in the future.</p>
+
+<p>Lastly, we introduce another type layer to cause a compile error with a nice error message, in case the requested type is not available, i.e., <code class="highlighter-rouge">BinaryFloatOrVoid</code> is <code class="highlighter-rouge">void</code>.</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="n">AssertTypeFound</span> <span class="p">{</span>
+  <span class="k">static_assert</span><span class="p">(</span>
+      <span class="o">!::</span><span class="n">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="kt">void</span><span class="o">&gt;</span><span class="p">,</span>
+      <span class="s">"No corresponding IEEE 754-2008 binary interchange format found."</span><span class="p">);</span>
+  <span class="k">using</span> <span class="n">type</span> <span class="o">=</span> <span class="n">T</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="kt">int</span> <span class="n">storage_bits</span><span class="o">&gt;</span>
+<span class="k">using</span> <span class="n">IEEE_754_2008_Binary</span> <span class="o">=</span> <span class="k">typename</span> <span class="n">AssertTypeFound</span><span class="o">&lt;</span>
+    <span class="n">BinaryFloatOrVoid</span><span class="o">&lt;</span><span class="n">storage_bits</span><span class="o">&gt;&gt;::</span><span class="n">type</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>OK, finally, we have constructed the type <code class="highlighter-rouge">IEEE_754_2008_Binary&lt;n&gt;</code> that guarantees IEEE 754 standard binary interchange format. Yay!</p>
+
+<p>So are we done now? Not quite, there is one last step that every programmer loves: writing tests. :)</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="kt">int</span> <span class="n">storage_bits</span><span class="p">,</span> <span class="kt">int</span> <span class="n">exponent_bits</span><span class="p">,</span> <span class="kt">int</span> <span class="n">mantissa_bits</span><span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">test_if_type_exists</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">throw</span><span class="p">;</span>
+
+  <span class="k">if</span> <span class="nf">constexpr</span> <span class="p">(</span><span class="o">!::</span><span class="n">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="n">BinaryFloatOrVoid</span><span class="o">&lt;</span><span class="n">storage_bits</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">void</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">using</span> <span class="n">T</span> <span class="o">=</span> <span class="n">IEEE_754_2008_Binary</span><span class="o">&lt;</span><span class="n">storage_bits</span><span class="o">&gt;</span><span class="p">;</span>
+    <span class="k">static_assert</span><span class="p">(</span><span class="o">::</span><span class="n">std</span><span class="o">::</span><span class="n">is_floating_point</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(),</span> <span class="s">""</span><span class="p">);</span>
+    <span class="k">static_assert</span><span class="p">(</span><span class="o">::</span><span class="n">std</span><span class="o">::</span><span class="n">numeric_limits</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">is_iec559</span><span class="p">,</span> <span class="s">""</span><span class="p">);</span>
+    <span class="k">static_assert</span><span class="p">(</span><span class="o">::</span><span class="n">std</span><span class="o">::</span><span class="n">numeric_limits</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">radix</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="s">""</span><span class="p">);</span>
+    <span class="k">static_assert</span><span class="p">(</span><span class="n">get_storage_bits</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">()</span> <span class="o">==</span> <span class="n">storage_bits</span><span class="p">,</span> <span class="s">""</span><span class="p">);</span>
+    <span class="k">static_assert</span><span class="p">(</span><span class="n">get_exponent_bits</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">()</span> <span class="o">==</span> <span class="n">exponent_bits</span><span class="p">,</span> <span class="s">""</span><span class="p">);</span>
+    <span class="k">static_assert</span><span class="p">(</span><span class="n">get_mantissa_bits</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">()</span> <span class="o">==</span> <span class="n">mantissa_bits</span><span class="p">,</span> <span class="s">""</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="n">tests</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">throw</span><span class="p">;</span>
+
+  <span class="n">test_if_type_exists</span><span class="o">&lt;</span><span class="mi">16</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="o">&gt;</span><span class="p">();</span>
+  <span class="n">test_if_type_exists</span><span class="o">&lt;</span><span class="mi">32</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">23</span><span class="o">&gt;</span><span class="p">();</span>
+  <span class="n">test_if_type_exists</span><span class="o">&lt;</span><span class="mi">64</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">52</span><span class="o">&gt;</span><span class="p">();</span>
+  <span class="n">test_if_type_exists</span><span class="o">&lt;</span><span class="mi">128</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">112</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Again, all the checks are done at compile time, <code class="highlighter-rouge">static_assert</code>, so we don’t need to call <code class="highlighter-rouge">test()</code>, and just have to ensure that <code class="highlighter-rouge">test_if_type_exists</code> functions are instantiated.  If a type doesn’t exists (i.e., 16 and 128 size types in most systems) then <code class="highlighter-rouge">if constexpr</code> will simply discard the checks.</p>
+
+<p>I hope you had fun, like I did. The full implementation is available in this repository <a href="https://github.com/kkimdev/ieee754-types">https://github.com/kkimdev/ieee754-types</a> .</p>
+
+
+  </div><a class="u-url" href="/posts/2018/06/15/IEEE-754-Floating-Point-Type-in-C++.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kibeom Kim</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kibeom Kim</li><li><a class="u-email" href="mailto:kk1674@nyu.edu">kk1674@nyu.edu</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://www.facebook.com/kkimdev"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#facebook"></use></svg> <span class="username">kkimdev</span></a></li><li><a href="https://github.com/kkimdev"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">kkimdev</span></a></li><li><a href="https://www.linkedin.com/in/kkimdev"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#linkedin"></use></svg> <span class="username">kkimdev</span></a></li><li><a href="https://youtube.com/channel%2FUCFjh-t8vgQxkxAvhOd1byzw%2F"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#youtube"></use></svg> <span class="username">channel/UCFjh-t8vgQxkxAvhOd1byzw/</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p></p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
