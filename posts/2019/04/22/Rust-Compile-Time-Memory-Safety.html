@@ -277,10 +277,10 @@ with Rust.</p>
 </ul>
 
 <p>To make these compile time memory checks possible, Rust enforces single mutable
-ownership or multiple readonly aliases at a time.  Normally, those rules
-do not get in the way for ordinary applications.  For libraries that require
-fine-grained memory control like data containers, e.g., vector, list,
- and hash map,
+ownership or multiple readonly aliases at a time.  In fact, they are very good
+idioms to structure large codebase anyways, and normally they do not get in the
+way for ordinary applications.  For libraries that require fine-grained memory
+control like data containers, e.g., vector, list, and hash map,
 <a href="https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html"><code class="highlighter-rouge">unsafe</code> keyword</a> is
 available to bypass the restrictions.</p>
 

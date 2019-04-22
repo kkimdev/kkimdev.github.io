@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="https://kkimdev.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://kkimdev.github.io/" rel="alternate" type="text/html" /><updated>2019-04-22T15:23:52+00:00</updated><id>https://kkimdev.github.io/feed.xml</id><title type="html">Kibeom Kim</title><entry><title type="html">Rust - Compile Time Memory Safety</title><link href="https://kkimdev.github.io/posts/2019/04/22/Rust-Compile-Time-Memory-Safety.html" rel="alternate" type="text/html" title="Rust - Compile Time Memory Safety" /><published>2019-04-22T00:00:00+00:00</published><updated>2019-04-22T00:00:00+00:00</updated><id>https://kkimdev.github.io/posts/2019/04/22/Rust%20-%20Compile%20Time%20Memory%20Safety</id><content type="html" xml:base="https://kkimdev.github.io/posts/2019/04/22/Rust-Compile-Time-Memory-Safety.html">&lt;p&gt;In this post, I will explain why Rust is interesting by making an
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="https://kkimdev.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://kkimdev.github.io/" rel="alternate" type="text/html" /><updated>2019-04-22T16:16:15+00:00</updated><id>https://kkimdev.github.io/feed.xml</id><title type="html">Kibeom Kim</title><entry><title type="html">Rust - Compile Time Memory Safety</title><link href="https://kkimdev.github.io/posts/2019/04/22/Rust-Compile-Time-Memory-Safety.html" rel="alternate" type="text/html" title="Rust - Compile Time Memory Safety" /><published>2019-04-22T00:00:00+00:00</published><updated>2019-04-22T00:00:00+00:00</updated><id>https://kkimdev.github.io/posts/2019/04/22/Rust%20-%20Compile%20Time%20Memory%20Safety</id><content type="html" xml:base="https://kkimdev.github.io/posts/2019/04/22/Rust-Compile-Time-Memory-Safety.html">&lt;p&gt;In this post, I will explain why Rust is interesting by making an
 analogy between “dynamic vs static typing” and “C++ vs Rust’s static memory
 validation” without going into too much detail.&lt;/p&gt;
 
@@ -218,10 +218,10 @@ with Rust.&lt;/p&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;To make these compile time memory checks possible, Rust enforces single mutable
-ownership or multiple readonly aliases at a time.  Normally, those rules
-do not get in the way for ordinary applications.  For libraries that require
-fine-grained memory control like data containers, e.g., vector, list,
- and hash map,
+ownership or multiple readonly aliases at a time.  In fact, they are very good
+idioms to structure large codebase anyways, and normally they do not get in the
+way for ordinary applications.  For libraries that require fine-grained memory
+control like data containers, e.g., vector, list, and hash map,
 &lt;a href=&quot;https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;unsafe&lt;/code&gt; keyword&lt;/a&gt; is
 available to bypass the restrictions.&lt;/p&gt;
 
