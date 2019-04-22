@@ -317,6 +317,21 @@ control like data containers, e.g., vector, list, and hash map,
 <a href="https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html"><code class="highlighter-rouge">unsafe</code> keyword</a> is
 available to bypass the restrictions.</p>
 
+<p>To be fair, there are compiler options or external tools we can use to
+detect C++ memory issues.  However, it’s nowhere close to the completeness of
+Rust due to the implementation complexity and the inherent language spec
+limitations.</p>
+<ul>
+  <li><code class="highlighter-rouge">-Wall -Wextra</code> compiler options: Even for the above trivial examples,
+GCC 8.3 and Clang 8.0 could only detect the one issue, uninitialized
+variable, out of the five cases.</li>
+  <li>Third party tools, e.g., Valgrind, Address/Memory/Thread Sanitizers: They are
+great tools.  However in practice, being able to detect at compile time vs
+runtime is a big difference as the detection is limited to the specific test
+cases that we have.  Otherwise, there would be no need for static typing for
+correctness as we can run tests to catch the type errors.</li>
+</ul>
+
 <h1 id="how-rust-is-received">How Rust is received</h1>
 
 <p>Rust has been consistently ranked #1 in <a href="https://insights.stackoverflow.com/survey/2019#technology-_-most-loved-dreaded-and-wanted-languages">Stack Overlow developer survey’s most loved programming languages category</a> for 4 years in a row, followed by Python #2, Typescript #3, and Kotlin #4 in 2019.</p>
