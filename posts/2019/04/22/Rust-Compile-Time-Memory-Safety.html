@@ -62,6 +62,7 @@ analogy between “dynamic vs static typing” and “C++ vs Rust’s static mem
 validation” without going into too much detail.</p>
 
 <h1 id="preventing-type-errors-at-compile-time">Preventing type errors at compile time</h1>
+
 <p>Static typing prevents type errors at compile time, for example,</p>
 
 <ul>
@@ -177,6 +178,38 @@ with Rust.</p>
   </li>
 </ul>
 
+<h4 id="dangling-pointer--variable">Dangling pointer / variable</h4>
+
+<ul>
+  <li>
+    <p>C++</p>
+
+    <div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">string_view</span> <span class="n">get_extension</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">filename</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">filename</span><span class="p">.</span><span class="n">substr</span><span class="p">(</span><span class="n">filename</span><span class="p">.</span><span class="n">find_last_of</span><span class="p">(</span><span class="sc">'.'</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="c1">// Returning dangling std::string_view at runtime.</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Rust</p>
+
+    <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">get_extension</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">String</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nv">'static</span> <span class="nb">str</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="o">&amp;</span><span class="n">filename</span><span class="p">[</span><span class="n">filename</span><span class="nf">.rfind</span><span class="p">(</span><span class="sc">'.'</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">()</span><span class="o">+</span><span class="mi">1</span><span class="o">..</span><span class="p">];</span>
+    <span class="c">// Compile error</span>
+    <span class="c">// error[E0515]: cannot return value referencing function parameter `filename`</span>
+    <span class="c">//   |</span>
+    <span class="c">//   | return &amp;filename[filename.rfind('.').unwrap()+1..];</span>
+    <span class="c">//   |        ^--------^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>
+    <span class="c">//   |        ||</span>
+    <span class="c">//   |        |`filename` is borrowed here</span>
+    <span class="c">//   |        returns a value referencing data owned by the current function</span>
+    <span class="c">//   }</span>
+    <span class="c">//</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
 <h4 id="incorrectly-using-a-moved-object">Incorrectly using a moved object</h4>
 
 <ul>
@@ -277,9 +310,9 @@ with Rust.</p>
 </ul>
 
 <p>To make these compile time memory checks possible, Rust enforces single mutable
-ownership or multiple readonly aliases at a time.  In fact, they are very good
+ownership or multiple readonly aliases at a time. In fact, they are very good
 idioms to structure large codebase anyways, and normally they do not get in the
-way for ordinary applications.  For libraries that require fine-grained memory
+way for ordinary applications. For libraries that require fine-grained memory
 control like data containers, e.g., vector, list, and hash map,
 <a href="https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html"><code class="highlighter-rouge">unsafe</code> keyword</a> is
 available to bypass the restrictions.</p>
@@ -300,6 +333,7 @@ available to bypass the restrictions.</p>
 </ul>
 
 <h1 id="rust-in-production">Rust in production</h1>
+
 <ul>
   <li><a href="https://chromium.googlesource.com/chromiumos/platform/crosvm/">Google Chrome Crosvm</a></li>
   <li><a href="https://www.theregister.co.uk/2016/10/18/facebook_mercurial_devs_forget_git/">Facebook’s new Mercurial server</a></li>
@@ -316,11 +350,13 @@ available to bypass the restrictions.</p>
 </ul>
 
 <h1 id="conclusion">Conclusion</h1>
+
 <p>This is just one example why Rust is compelling, and there are so many other
 things that Rust got it right. Hopefully it was interesting enough for you to
 read more about Rust!</p>
 
 <h1 id="references">References</h1>
+
 <ul>
   <li><a href="https://www.jonathanturner.org/2017/10/fun-facts-about-rust-growth.html">https://www.jonathanturner.org/2017/10/fun-facts-about-rust-growth.html</a></li>
   <li><a href="https://www.jonathanturner.org/2018/07/snapshot-of-rust-popularity.html">https://www.jonathanturner.org/2018/07/snapshot-of-rust-popularity.html</a></li>

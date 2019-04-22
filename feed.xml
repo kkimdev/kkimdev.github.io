@@ -1,8 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="https://kkimdev.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://kkimdev.github.io/" rel="alternate" type="text/html" /><updated>2019-04-22T16:16:15+00:00</updated><id>https://kkimdev.github.io/feed.xml</id><title type="html">Kibeom Kim</title><entry><title type="html">Rust - Compile Time Memory Safety</title><link href="https://kkimdev.github.io/posts/2019/04/22/Rust-Compile-Time-Memory-Safety.html" rel="alternate" type="text/html" title="Rust - Compile Time Memory Safety" /><published>2019-04-22T00:00:00+00:00</published><updated>2019-04-22T00:00:00+00:00</updated><id>https://kkimdev.github.io/posts/2019/04/22/Rust%20-%20Compile%20Time%20Memory%20Safety</id><content type="html" xml:base="https://kkimdev.github.io/posts/2019/04/22/Rust-Compile-Time-Memory-Safety.html">&lt;p&gt;In this post, I will explain why Rust is interesting by making an
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="https://kkimdev.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://kkimdev.github.io/" rel="alternate" type="text/html" /><updated>2019-04-22T16:46:41+00:00</updated><id>https://kkimdev.github.io/feed.xml</id><title type="html">Kibeom Kim</title><entry><title type="html">Rust - Compile Time Memory Safety</title><link href="https://kkimdev.github.io/posts/2019/04/22/Rust-Compile-Time-Memory-Safety.html" rel="alternate" type="text/html" title="Rust - Compile Time Memory Safety" /><published>2019-04-22T00:00:00+00:00</published><updated>2019-04-22T00:00:00+00:00</updated><id>https://kkimdev.github.io/posts/2019/04/22/Rust%20-%20Compile%20Time%20Memory%20Safety</id><content type="html" xml:base="https://kkimdev.github.io/posts/2019/04/22/Rust-Compile-Time-Memory-Safety.html">&lt;p&gt;In this post, I will explain why Rust is interesting by making an
 analogy between “dynamic vs static typing” and “C++ vs Rust’s static memory
 validation” without going into too much detail.&lt;/p&gt;
 
 &lt;h1 id=&quot;preventing-type-errors-at-compile-time&quot;&gt;Preventing type errors at compile time&lt;/h1&gt;
+
 &lt;p&gt;Static typing prevents type errors at compile time, for example,&lt;/p&gt;
 
 &lt;ul&gt;
@@ -118,6 +119,38 @@ with Rust.&lt;/p&gt;
   &lt;/li&gt;
 &lt;/ul&gt;
 
+&lt;h4 id=&quot;dangling-pointer--variable&quot;&gt;Dangling pointer / variable&lt;/h4&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;C++&lt;/p&gt;
+
+    &lt;div class=&quot;language-c++ highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string_view&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get_extension&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;filename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;filename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;substr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;filename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;find_last_of&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;sc&quot;&gt;'.'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// Returning dangling std::string_view at runtime.&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Rust&lt;/p&gt;
+
+    &lt;div class=&quot;language-rust highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;get_extension&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;filename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;'static&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;filename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;filename&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.rfind&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;sc&quot;&gt;'.'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;.unwrap&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;..&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;// Compile error&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;// error[E0515]: cannot return value referencing function parameter `filename`&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;//   |&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;//   | return &amp;amp;filename[filename.rfind('.').unwrap()+1..];&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;//   |        ^--------^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;//   |        ||&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;//   |        |`filename` is borrowed here&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;//   |        returns a value referencing data owned by the current function&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;//   }&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;//&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
 &lt;h4 id=&quot;incorrectly-using-a-moved-object&quot;&gt;Incorrectly using a moved object&lt;/h4&gt;
 
 &lt;ul&gt;
@@ -218,9 +251,9 @@ with Rust.&lt;/p&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;To make these compile time memory checks possible, Rust enforces single mutable
-ownership or multiple readonly aliases at a time.  In fact, they are very good
+ownership or multiple readonly aliases at a time. In fact, they are very good
 idioms to structure large codebase anyways, and normally they do not get in the
-way for ordinary applications.  For libraries that require fine-grained memory
+way for ordinary applications. For libraries that require fine-grained memory
 control like data containers, e.g., vector, list, and hash map,
 &lt;a href=&quot;https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;unsafe&lt;/code&gt; keyword&lt;/a&gt; is
 available to bypass the restrictions.&lt;/p&gt;
@@ -241,6 +274,7 @@ available to bypass the restrictions.&lt;/p&gt;
 &lt;/ul&gt;
 
 &lt;h1 id=&quot;rust-in-production&quot;&gt;Rust in production&lt;/h1&gt;
+
 &lt;ul&gt;
   &lt;li&gt;&lt;a href=&quot;https://chromium.googlesource.com/chromiumos/platform/crosvm/&quot;&gt;Google Chrome Crosvm&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;https://www.theregister.co.uk/2016/10/18/facebook_mercurial_devs_forget_git/&quot;&gt;Facebook’s new Mercurial server&lt;/a&gt;&lt;/li&gt;
@@ -257,11 +291,13 @@ available to bypass the restrictions.&lt;/p&gt;
 &lt;/ul&gt;
 
 &lt;h1 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h1&gt;
+
 &lt;p&gt;This is just one example why Rust is compelling, and there are so many other
 things that Rust got it right. Hopefully it was interesting enough for you to
 read more about Rust!&lt;/p&gt;
 
 &lt;h1 id=&quot;references&quot;&gt;References&lt;/h1&gt;
+
 &lt;ul&gt;
   &lt;li&gt;&lt;a href=&quot;https://www.jonathanturner.org/2017/10/fun-facts-about-rust-growth.html&quot;&gt;https://www.jonathanturner.org/2017/10/fun-facts-about-rust-growth.html&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;https://www.jonathanturner.org/2018/07/snapshot-of-rust-popularity.html&quot;&gt;https://www.jonathanturner.org/2018/07/snapshot-of-rust-popularity.html&lt;/a&gt;&lt;/li&gt;
