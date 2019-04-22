@@ -117,8 +117,12 @@ projects.</p>
 we can validate them at compile time in a similar manner that static typing
 does.</p>
 
-<p>Yes, this was one of the main motivations behind the creation of Rust. Here is
-a sample list of memory issues that can be validated at compile time with Rust.</p>
+<p>Yes, this was one of the main motivations behind the creation of Rust.
+Just like C++ compiler tracks type information for each variable, Rust compiler
+tracks ownership, lifetime, and aliasing for each variable in addition.</p>
+
+<p>Here is a small list of memory issues that can be validated at compile time
+with Rust.</p>
 
 <h4 id="using-uninitialized-variable">Using uninitialized variable</h4>
 
@@ -136,7 +140,11 @@ a sample list of memory issues that can be validated at compile time with Rust.<
 
     <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="k">mut</span> <span class="n">x</span><span class="p">:</span> <span class="nb">i32</span><span class="p">;</span>
 <span class="k">let</span> <span class="k">mut</span> <span class="n">y</span> <span class="o">=</span> <span class="nf">square</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
-<span class="c">// Compile error: Use of possibly uninitialized `x`</span>
+<span class="c">// Compile error</span>
+<span class="c">// error[E0381]: use of possibly uninitialized variable: `x`</span>
+<span class="c">//   |</span>
+<span class="c">//   | let mut y = square(x);</span>
+<span class="c">//   |                    ^ use of possibly uninitialized `x`</span>
 </code></pre></div>    </div>
   </li>
 </ul>
@@ -160,7 +168,6 @@ a sample list of memory issues that can be validated at compile time with Rust.<
 <span class="o">*</span><span class="n">x</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
 <span class="c">// Compile error</span>
 <span class="c">// error[E0133]: dereference of raw pointer is unsafe and requires unsafe function or block</span>
-<span class="c">//  --&gt; src/main.rs:</span>
 <span class="c">//   |</span>
 <span class="c">//   | *x = 5;</span>
 <span class="c">//   | ^^^^^^ dereference of raw pointer</span>
@@ -177,8 +184,8 @@ a sample list of memory issues that can be validated at compile time with Rust.<
     <p>C++</p>
 
     <div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">};</span>
-<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">y</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
-<span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+<span class="n">process</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">x</span><span class="p">));</span>
+<span class="n">x</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
 <span class="c1">// Runtime invalid memory access</span>
 </code></pre></div>    </div>
   </li>
@@ -186,9 +193,17 @@ a sample list of memory issues that can be validated at compile time with Rust.<
     <p>Rust</p>
 
     <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="k">mut</span> <span class="n">x</span> <span class="o">=</span> <span class="nd">vec!</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">];</span>
-<span class="k">let</span> <span class="k">mut</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
-<span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
-<span class="c">// Compile error: borrow of moved value: `x`</span>
+<span class="nf">process</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+<span class="n">x</span><span class="nf">.push</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
+<span class="c">// Compile error</span>
+<span class="c">// error[E0382]: borrow of moved value: `x`</span>
+<span class="c">//   |</span>
+<span class="c">//   | let mut x = vec![1, 2, 3];</span>
+<span class="c">//   |     ----- move occurs because `x` has type `std::vec::Vec&lt;i32&gt;`, which does not implement the `Copy` trait</span>
+<span class="c">//   | process(x);</span>
+<span class="c">//   |         - value moved here</span>
+<span class="c">//   | x.push(4);</span>
+<span class="c">//   | ^ value borrowed here after move</span>
 </code></pre></div>    </div>
   </li>
 </ul>
@@ -235,7 +250,6 @@ a sample list of memory issues that can be validated at compile time with Rust.<
         <span class="n">MONEY</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
         <span class="c">// Compile error</span>
         <span class="c">// error[E0133]: use of mutable static is unsafe and requires unsafe function or block</span>
-        <span class="c">//  --&gt; src/main.rs</span>
         <span class="c">//   |</span>
         <span class="c">//   |     MONEY += 1;</span>
         <span class="c">//   |     ^^^^^^^^^^ use of mutable static</span>
