@@ -325,7 +325,7 @@ limitations.</p>
   <li><code class="highlighter-rouge">-Wall -Wextra</code> compiler options: Even for the above trivial examples,
 GCC 8.3 and Clang 8.0 could only detect the one case, uninitialized
 variable, out of the five cases.</li>
-  <li>Third party tools, e.g., Valgrind, Address/Memory/Thread Sanitizers: They are
+  <li>External tools, e.g., Valgrind, Address/Memory/Thread Sanitizers: They are
 great tools.  However in practice, being able to detect at compile time vs
 runtime is a big difference as the detection is limited to the specific test
 cases that we have.  Otherwise, there would be no need for static typing for
