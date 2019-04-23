@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="https://kkimdev.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://kkimdev.github.io/" rel="alternate" type="text/html" /><updated>2019-04-22T19:53:43+00:00</updated><id>https://kkimdev.github.io/feed.xml</id><title type="html">Kibeom Kim</title><entry><title type="html">Rust - Compile Time Memory Safety</title><link href="https://kkimdev.github.io/posts/2019/04/22/Rust-Compile-Time-Memory-Safety.html" rel="alternate" type="text/html" title="Rust - Compile Time Memory Safety" /><published>2019-04-22T00:00:00+00:00</published><updated>2019-04-22T00:00:00+00:00</updated><id>https://kkimdev.github.io/posts/2019/04/22/Rust%20-%20Compile%20Time%20Memory%20Safety</id><content type="html" xml:base="https://kkimdev.github.io/posts/2019/04/22/Rust-Compile-Time-Memory-Safety.html">&lt;p&gt;In this post, I will explain why Rust is interesting by making an
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="https://kkimdev.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://kkimdev.github.io/" rel="alternate" type="text/html" /><updated>2019-04-23T00:24:19+00:00</updated><id>https://kkimdev.github.io/feed.xml</id><title type="html">Kibeom Kim</title><entry><title type="html">Rust - Compile Time Memory Safety</title><link href="https://kkimdev.github.io/posts/2019/04/22/Rust-Compile-Time-Memory-Safety.html" rel="alternate" type="text/html" title="Rust - Compile Time Memory Safety" /><published>2019-04-22T00:00:00+00:00</published><updated>2019-04-22T00:00:00+00:00</updated><id>https://kkimdev.github.io/posts/2019/04/22/Rust%20-%20Compile%20Time%20Memory%20Safety</id><content type="html" xml:base="https://kkimdev.github.io/posts/2019/04/22/Rust-Compile-Time-Memory-Safety.html">&lt;p&gt;In this post, I will explain why Rust is interesting by making an
 analogy between “dynamic vs static typing” and “C++ vs Rust’s static memory
 validation” without going into too much detail.&lt;/p&gt;
 
@@ -37,12 +37,12 @@ following benefits (taken from
 &lt;ul&gt;
   &lt;li&gt;Catches (certain) bugs earlier&lt;/li&gt;
   &lt;li&gt;Refactor with confidence&lt;/li&gt;
-  &lt;li&gt;Help human reader navigate large code bases&lt;/li&gt;
+  &lt;li&gt;Helps human reader navigate large code bases&lt;/li&gt;
   &lt;li&gt;Better than (certain) comments: compiler keeps you honest&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;In fact, all popular dynamic languages have static typing projects, often
-backed by big corporations as dynamic typing doesn’t scale well in large
+backed by big corporations as static typing becomes more important in large
 projects.&lt;/p&gt;
 
 &lt;ul&gt;
