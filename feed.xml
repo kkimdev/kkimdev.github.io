@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="https://kkimdev.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://kkimdev.github.io/" rel="alternate" type="text/html" /><updated>2019-04-24T05:37:24+00:00</updated><id>https://kkimdev.github.io/feed.xml</id><title type="html">Kibeom Kim</title><entry><title type="html">Rust - Compile Time Memory Safety</title><link href="https://kkimdev.github.io/posts/2019/04/22/Rust-Compile-Time-Memory-Safety.html" rel="alternate" type="text/html" title="Rust - Compile Time Memory Safety" /><published>2019-04-22T00:00:00+00:00</published><updated>2019-04-22T00:00:00+00:00</updated><id>https://kkimdev.github.io/posts/2019/04/22/Rust%20-%20Compile%20Time%20Memory%20Safety</id><content type="html" xml:base="https://kkimdev.github.io/posts/2019/04/22/Rust-Compile-Time-Memory-Safety.html">&lt;p&gt;In this post, I will explain why Rust is interesting by making an analogy
-between “dynamic vs static typing” and “C++ vs Rust’s static memory validation”
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="https://kkimdev.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://kkimdev.github.io/" rel="alternate" type="text/html" /><updated>2019-04-24T19:26:00+00:00</updated><id>https://kkimdev.github.io/feed.xml</id><title type="html">Kibeom Kim</title><entry><title type="html">Rust - Compile Time Memory Safety</title><link href="https://kkimdev.github.io/posts/2019/04/22/Rust-Compile-Time-Memory-Safety.html" rel="alternate" type="text/html" title="Rust - Compile Time Memory Safety" /><published>2019-04-22T00:00:00+00:00</published><updated>2019-04-22T00:00:00+00:00</updated><id>https://kkimdev.github.io/posts/2019/04/22/Rust%20-%20Compile%20Time%20Memory%20Safety</id><content type="html" xml:base="https://kkimdev.github.io/posts/2019/04/22/Rust-Compile-Time-Memory-Safety.html">&lt;p&gt;In this post, I will explain why Rust is interesting by making an analogy
+between “dynamic vs static typing” and “C++ vs Rust’s static memory safety”
 without going into too much detail.&lt;/p&gt;
 
 &lt;h1 id=&quot;preventing-type-errors-at-compile-time&quot;&gt;Preventing type errors at compile time&lt;/h1&gt;
@@ -58,14 +58,13 @@ larger projects.&lt;/p&gt;
 &lt;h1 id=&quot;preventing-memory-errors-at-compile-time&quot;&gt;Preventing memory errors at compile time&lt;/h1&gt;
 
 &lt;p&gt;Since memory safety in C++ is a major practical issue, it would be great if we
-can validate them statically in a similar manner that static typing does.&lt;/p&gt;
+can check them statically in a similar manner that static typing does.&lt;/p&gt;
 
 &lt;p&gt;Yes, this was one of the main motivations behind the creation of Rust. Just like
 C++ compiler tracks type information for each variable, Rust compiler tracks
 ownership, lifetime, and aliasing for each variable in addition.&lt;/p&gt;
 
-&lt;p&gt;Here is a small list of memory issues that can be statically validated with
-Rust.&lt;/p&gt;
+&lt;p&gt;Here is a small list of memory issues that can be statically verified with Rust.&lt;/p&gt;
 
 &lt;h4 id=&quot;using-uninitialized-variable&quot;&gt;Using uninitialized variable&lt;/h4&gt;
 
@@ -323,7 +322,7 @@ read more about Rust!&lt;/p&gt;
   &lt;li&gt;&lt;a href=&quot;https://www.jonathanturner.org/2018/07/snapshot-of-rust-popularity.html&quot;&gt;https://www.jonathanturner.org/2018/07/snapshot-of-rust-popularity.html&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;https://users.rust-lang.org/t/rust-quotes-and-press/5405&quot;&gt;https://users.rust-lang.org/t/rust-quotes-and-press/5405&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;https://www.rust-lang.org/production/users&quot;&gt;https://www.rust-lang.org/production/users&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</content><author><name></name></author><category term="posts" /><summary type="html">In this post, I will explain why Rust is interesting by making an analogy between “dynamic vs static typing” and “C++ vs Rust’s static memory validation” without going into too much detail.</summary></entry><entry><title type="html">IEEE 754 Floating Point Type in C++</title><link href="https://kkimdev.github.io/posts/2018/06/15/IEEE-754-Floating-Point-Type-in-C++.html" rel="alternate" type="text/html" title="IEEE 754 Floating Point Type in C++" /><published>2018-06-15T00:00:00+00:00</published><updated>2018-06-15T00:00:00+00:00</updated><id>https://kkimdev.github.io/posts/2018/06/15/IEEE%20754%20Floating%20Point%20Type%20in%20C++</id><content type="html" xml:base="https://kkimdev.github.io/posts/2018/06/15/IEEE-754-Floating-Point-Type-in-C++.html">&lt;p&gt;Let’s say we want to use IEEE 754 32/64bit floating point types in C++, then
+&lt;/ul&gt;</content><author><name></name></author><category term="posts" /><summary type="html">In this post, I will explain why Rust is interesting by making an analogy between “dynamic vs static typing” and “C++ vs Rust’s static memory safety” without going into too much detail.</summary></entry><entry><title type="html">IEEE 754 Floating Point Type in C++</title><link href="https://kkimdev.github.io/posts/2018/06/15/IEEE-754-Floating-Point-Type-in-C++.html" rel="alternate" type="text/html" title="IEEE 754 Floating Point Type in C++" /><published>2018-06-15T00:00:00+00:00</published><updated>2018-06-15T00:00:00+00:00</updated><id>https://kkimdev.github.io/posts/2018/06/15/IEEE%20754%20Floating%20Point%20Type%20in%20C++</id><content type="html" xml:base="https://kkimdev.github.io/posts/2018/06/15/IEEE-754-Floating-Point-Type-in-C++.html">&lt;p&gt;Let’s say we want to use IEEE 754 32/64bit floating point types in C++, then
 there is &lt;code class=&quot;highlighter-rouge&quot;&gt;float&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;double&lt;/code&gt; right? Unfortunately, C++ standard guarantees
 almost nothing about the built-in floating point types.&lt;/p&gt;
 
