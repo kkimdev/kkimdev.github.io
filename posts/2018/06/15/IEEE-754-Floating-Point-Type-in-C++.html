@@ -57,13 +57,25 @@ if(!(window.doNotTrack === "1" || navigator.doNotTrack === "1" || navigator.doNo
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
-    <p>Let’s say we want to use IEEE 754 32/64bit floating point types in C++, then there is <code class="highlighter-rouge">float</code> and <code class="highlighter-rouge">double</code> right? Unfortunately, C++ standard guarantees almost nothing about the built-in floating point types.</p>
+    <p>Let’s say we want to use IEEE 754 32/64bit floating point types in C++, then
+there is <code class="highlighter-rouge">float</code> and <code class="highlighter-rouge">double</code> right? Unfortunately, C++ standard guarantees
+almost nothing about the built-in floating point types.</p>
 
 <blockquote>
-  <p><a href="http://eel.is/c++draft/basic.fundamental#8">§ 6.7.1.8</a> There are three floating-point types: float, double, and long double. The type double provides at least as much precision as float, and the type long double provides at least as much precision as double. The set of values of the type float is a subset of the set of values of the type double; the set of values of the type double is a subset of the set of values of the type long double. <strong>The value representation of floating-point types is implementation-defined</strong>. …</p>
+  <p><a href="http://eel.is/c++draft/basic.fundamental#8">§ 6.7.1.8</a> There are three
+floating-point types: float, double, and long double. The type double provides
+at least as much precision as float, and the type long double provides at
+least as much precision as double. The set of values of the type float is a
+subset of the set of values of the type double; the set of values of the type
+double is a subset of the set of values of the type long double. <strong>The value
+representation of floating-point types is implementation-defined</strong>. …</p>
 </blockquote>
 
-<p>So are we just doomed? No! There is <a href="http://en.cppreference.com/w/cpp/types/numeric_limits">std::numeric_limits</a> that gives various floating point type trait information, and neat C++ compile time tricks we can use to craft a clean type API. So let’s try. The goal is to construct the following IEEE754 floating point types.</p>
+<p>So are we just doomed? No! There is
+<a href="http://en.cppreference.com/w/cpp/types/numeric_limits">std::numeric_limits</a>
+that gives various floating point type trait information, and neat C++ compile
+time tricks we can use to craft a clean type API. So let’s try. The goal is to
+construct the following IEEE754 floating point types.</p>
 
 <div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;iostream&gt;
 #include "ieee754_types.hpp"
@@ -79,11 +91,24 @@ if(!(window.doNotTrack === "1" || navigator.doNotTrack === "1" || navigator.doNo
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p><code class="highlighter-rouge">IEEE_754_2008_Binary&lt;n&gt;</code> is n-bit IEEE 754 floating point type. Of course, for most systems, <code class="highlighter-rouge">IEEE_754_2008_Binary&lt;32&gt;</code> is <code class="highlighter-rouge">float</code> and <code class="highlighter-rouge">IEEE_754_2008_Binary&lt;64&gt;</code> is <code class="highlighter-rouge">double</code>. In case the requested type is not available, like <code class="highlighter-rouge">IEEE_754_2008_Binary&lt;16&gt;</code>, it should cause a compile error with a clear error message.</p>
+<p><code class="highlighter-rouge">IEEE_754_2008_Binary&lt;n&gt;</code> is n-bit IEEE 754 floating point type. Of course, for
+most systems, <code class="highlighter-rouge">IEEE_754_2008_Binary&lt;32&gt;</code> is <code class="highlighter-rouge">float</code> and
+<code class="highlighter-rouge">IEEE_754_2008_Binary&lt;64&gt;</code> is <code class="highlighter-rouge">double</code>. In case the requested type is not
+available, like <code class="highlighter-rouge">IEEE_754_2008_Binary&lt;16&gt;</code>, it should cause a compile error with
+a clear error message.</p>
 
-<p>Well, I guess a natural question at this point is: “Do we really need this? Can’t we just assume <code class="highlighter-rouge">float</code> and <code class="highlighter-rouge">double</code> are IEEE 754 because they actually are for the 99.9% systems out there?”. I thought so, but then later, I’ve found that people have submitted related proposals, <a href="http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1703.pdf">N1703</a>, <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3626.pdf">N3626</a>, to C/C++ standards committee to fix this issue with additional standard types, <code class="highlighter-rouge">float16_t</code>, <code class="highlighter-rouge">float32_t</code>, <code class="highlighter-rouge">float64_t</code>, and <code class="highlighter-rouge">float128_t</code>. So maybe it’s not entirely pointless after all. Anyways, let’s get started.</p>
+<p>Well, I guess a natural question at this point is: “Do we really need this?
+Can’t we just assume <code class="highlighter-rouge">float</code> and <code class="highlighter-rouge">double</code> are IEEE 754 because they actually are
+for the 99.9% systems out there?”. I thought so, but then later, I’ve found that
+people have submitted related proposals,
+<a href="http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1703.pdf">N1703</a>,
+<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3626.pdf">N3626</a>, to
+C/C++ standards committee to fix this issue with additional standard types,
+<code class="highlighter-rouge">float16_t</code>, <code class="highlighter-rouge">float32_t</code>, <code class="highlighter-rouge">float64_t</code>, and <code class="highlighter-rouge">float128_t</code>. So maybe it’s not
+entirely pointless after all. Anyways, let’s get started.</p>
 
-<p>First, let’s begin with checking if a given type, <code class="highlighter-rouge">T</code>, fulfills IEEE 754 and other desired conditions.</p>
+<p>First, let’s begin with checking if a given type, <code class="highlighter-rouge">T</code>, fulfills IEEE 754 and
+other desired conditions.</p>
 
 <div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="kt">int</span> <span class="n">storage_bits</span><span class="p">,</span> <span class="kt">int</span> <span class="n">exponent_bits</span><span class="p">,</span> <span class="kt">int</span> <span class="n">mantissa_bits</span><span class="o">&gt;</span>
 <span class="k">struct</span> <span class="n">Is_Ieee754_2008_Binary_Interchange_Format</span> <span class="p">{</span>
@@ -98,11 +123,24 @@ if(!(window.doNotTrack === "1" || navigator.doNotTrack === "1" || navigator.doNo
 <span class="p">};</span>
 </code></pre></div></div>
 
-<p>We used <a href="https://en.cppreference.com/w/cpp/language/variable_template">variable template</a> for the type dependent boolean value computation, and also wrapped by a template struct so that we can pass it around easily as a type template parameter later.</p>
+<p>We used
+<a href="https://en.cppreference.com/w/cpp/language/variable_template">variable template</a>
+for the type dependent boolean value computation, and also wrapped by a template
+struct so that we can pass it around easily as a type template parameter later.</p>
 
-<p>First, we check if <code class="highlighter-rouge">T</code> compiles IEEE 754 (equivalently, <a href="https://www.iso.org/standard/57469.html">IEC 60559</a>) with <a href="https://en.cppreference.com/w/cpp/types/numeric_limits/is_iec559"><code class="highlighter-rouge">std::is_iec559</code></a>. We should also check <code class="highlighter-rouge">radix == 2</code> since IEEE 754 defines two types of floating points, binary and decimal. Finally, we check if <code class="highlighter-rouge">T</code> has the requested number of storage(width), exponent, and mantissa bits. IEEE 754 defines the standard number of exponent and mantissa bits for certain sizes, 16, 32, 64, 128, 160, …, but it also allows implementations to have arbitrary sizes and bits (e.g., <a href="https://en.wikipedia.org/wiki/Extended_precision#x86_extended_precision_format">x86 extended precision format</a>), so we need to check that if <code class="highlighter-rouge">T</code> has the exact format we want.</p>
+<p>First, we check if <code class="highlighter-rouge">T</code> compiles IEEE 754 (equivalently,
+<a href="https://www.iso.org/standard/57469.html">IEC 60559</a>) with
+<a href="https://en.cppreference.com/w/cpp/types/numeric_limits/is_iec559"><code class="highlighter-rouge">std::is_iec559</code></a>.
+We should also check <code class="highlighter-rouge">radix == 2</code> since IEEE 754 defines two types of floating
+points, binary and decimal. Finally, we check if <code class="highlighter-rouge">T</code> has the requested number of
+storage(width), exponent, and mantissa bits. IEEE 754 defines the standard
+number of exponent and mantissa bits for certain sizes, 16, 32, 64, 128, 160,
+…, but it also allows implementations to have arbitrary sizes and bits (e.g.,
+<a href="https://en.wikipedia.org/wiki/Extended_precision#x86_extended_precision_format">x86 extended precision format</a>),
+so we need to check that if <code class="highlighter-rouge">T</code> has the exact format we want.</p>
 
-<p>We can calculate the number of bits of <code class="highlighter-rouge">T</code> with the following simple compile time functions.</p>
+<p>We can calculate the number of bits of <code class="highlighter-rouge">T</code> with the following simple compile
+time functions.</p>
 
 <div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
 <span class="k">constexpr</span> <span class="kt">int</span> <span class="n">get_storage_bits</span><span class="p">()</span> <span class="p">{</span>
@@ -124,11 +162,20 @@ if(!(window.doNotTrack === "1" || navigator.doNotTrack === "1" || navigator.doNo
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>For the mantissa bits, the leading bit is implicit so we need to subtract 1. For the exponent bits, there is no direct property available in <code class="highlighter-rouge">std::numeric_limits</code> so instead we calculate the minimum number of bits required to represent its exponent range.</p>
+<p>For the mantissa bits, the leading bit is implicit so we need to subtract 1. For
+the exponent bits, there is no direct property available in
+<code class="highlighter-rouge">std::numeric_limits</code> so instead we calculate the minimum number of bits
+required to represent its exponent range.</p>
 
-<p>Now, we have everything needed to figure out if the given <code class="highlighter-rouge">T</code> is the type we’re looking for. The next step is to automatically select such type among the built-in floating point types, <code class="highlighter-rouge">float</code>, <code class="highlighter-rouge">double</code>, and <code class="highlighter-rouge">long double</code>, given the size in bits, e.g., 32, 64. This is where it gets interesting.</p>
+<p>Now, we have everything needed to figure out if the given <code class="highlighter-rouge">T</code> is the type we’re
+looking for. The next step is to automatically select such type among the
+built-in floating point types, <code class="highlighter-rouge">float</code>, <code class="highlighter-rouge">double</code>, and <code class="highlighter-rouge">long double</code>, given the
+size in bits, e.g., 32, 64. This is where it gets interesting.</p>
 
-<p>The following <code class="highlighter-rouge">find_type()</code> recursive function selects a type among <code class="highlighter-rouge">T</code> and <code class="highlighter-rouge">Ts</code> that satisfies the condition <code class="highlighter-rouge">C</code>. In our case, <code class="highlighter-rouge">T</code> and <code class="highlighter-rouge">Ts</code> are <code class="highlighter-rouge">float, double, long double</code>, and <code class="highlighter-rouge">C</code> is the struct we defined previously, <code class="highlighter-rouge">Is_Ieee754_2008_Binary_Interchange_Format&lt;storage_bits, exponent_bits, storage_bits, mantissa_bits&gt;</code>.</p>
+<p>The following <code class="highlighter-rouge">find_type()</code> recursive function selects a type among <code class="highlighter-rouge">T</code> and <code class="highlighter-rouge">Ts</code>
+that satisfies the condition <code class="highlighter-rouge">C</code>. In our case, <code class="highlighter-rouge">T</code> and <code class="highlighter-rouge">Ts</code> are
+<code class="highlighter-rouge">float, double, long double</code>, and <code class="highlighter-rouge">C</code> is the struct we defined previously,
+<code class="highlighter-rouge">Is_Ieee754_2008_Binary_Interchange_Format&lt;storage_bits, exponent_bits, storage_bits, mantissa_bits&gt;</code>.</p>
 
 <div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">C</span><span class="p">,</span> <span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">Ts</span><span class="o">&gt;</span>
 <span class="k">constexpr</span> <span class="k">auto</span> <span class="n">find_type</span><span class="p">()</span> <span class="p">{</span>
@@ -144,13 +191,32 @@ if(!(window.doNotTrack === "1" || navigator.doNotTrack === "1" || navigator.doNo
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p><code class="highlighter-rouge">typename... Ts</code> is a <a href="https://en.cppreference.com/w/cpp/language/parameter_pack">parameter pack</a> that can match any number of types. So <code class="highlighter-rouge">T</code> will be <code class="highlighter-rouge">float</code> and <code class="highlighter-rouge">Ts</code> will be <code class="highlighter-rouge">double, long double</code>. The first if condition, <code class="highlighter-rouge">C::template value&lt;T&gt;</code> checks if <code class="highlighter-rouge">T</code> satisfies the condition given by <code class="highlighter-rouge">C</code>, if so, it returns a default instance of <code class="highlighter-rouge">T</code>. The second if condition, <code class="highlighter-rouge">sizeof...(Ts) &gt;= 1</code>, checks if there are more types in <code class="highlighter-rouge">Ts</code> to exam, if so, it recursively calls itself, <code class="highlighter-rouge">find_type()</code>, with <code class="highlighter-rouge">Ts</code> to continue the search. Finally, if there is nothing in <code class="highlighter-rouge">Ts</code>, it returns a void instance.</p>
+<p><code class="highlighter-rouge">typename... Ts</code> is a
+<a href="https://en.cppreference.com/w/cpp/language/parameter_pack">parameter pack</a> that
+can match any number of types. So <code class="highlighter-rouge">T</code> will be <code class="highlighter-rouge">float</code> and <code class="highlighter-rouge">Ts</code> will be
+<code class="highlighter-rouge">double, long double</code>. The first if condition, <code class="highlighter-rouge">C::template value&lt;T&gt;</code> checks if
+<code class="highlighter-rouge">T</code> satisfies the condition given by <code class="highlighter-rouge">C</code>, if so, it returns a default instance
+of <code class="highlighter-rouge">T</code>. The second if condition, <code class="highlighter-rouge">sizeof...(Ts) &gt;= 1</code>, checks if there are more
+types in <code class="highlighter-rouge">Ts</code> to exam, if so, it recursively calls itself, <code class="highlighter-rouge">find_type()</code>, with
+<code class="highlighter-rouge">Ts</code> to continue the search. Finally, if there is nothing in <code class="highlighter-rouge">Ts</code>, it returns a
+void instance.</p>
 
-<p>Note that since the return type of <code class="highlighter-rouge">find_type()</code> is <code class="highlighter-rouge">auto</code>, the return type will be deduced to what <code class="highlighter-rouge">find_type()</code> returns at compile time. In addition, <a href="http://en.cppreference.com/w/cpp/language/if#Constexpr_If"><code class="highlighter-rouge">if constexpr</code></a> discards the unused conditional paths at compile time, so even though <code class="highlighter-rouge">find_type()</code> has multiple return statements with different types, it compiles successfully.</p>
+<p>Note that since the return type of <code class="highlighter-rouge">find_type()</code> is <code class="highlighter-rouge">auto</code>, the return type will
+be deduced to what <code class="highlighter-rouge">find_type()</code> returns at compile time. In addition,
+<a href="http://en.cppreference.com/w/cpp/language/if#Constexpr_If"><code class="highlighter-rouge">if constexpr</code></a>
+discards the unused conditional paths at compile time, so even though
+<code class="highlighter-rouge">find_type()</code> has multiple return statements with different types, it compiles
+successfully.</p>
 
-<p>Since <code class="highlighter-rouge">find_type()</code>’s return type is what we need, we can do <code class="highlighter-rouge">decltype(find_type&lt;...&gt;())</code> to get that. The statement <code class="highlighter-rouge">throw;</code> at the first line of <code class="highlighter-rouge">find_type()</code> is not necessary but it’s there to indicate that <code class="highlighter-rouge">find_type()</code> is not supposed to be called directly.</p>
+<p>Since <code class="highlighter-rouge">find_type()</code>’s return type is what we need, we can do
+<code class="highlighter-rouge">decltype(find_type&lt;...&gt;())</code> to get that. The statement <code class="highlighter-rouge">throw;</code> at the first
+line of <code class="highlighter-rouge">find_type()</code> is not necessary but it’s there to indicate that
+<code class="highlighter-rouge">find_type()</code> is not supposed to be called directly.</p>
 
-<p>The following code defines <code class="highlighter-rouge">BinaryFloatOrVoid</code> type using <code class="highlighter-rouge">decltype(find_type&lt;...&gt;())</code>. The newly defined type, <code class="highlighter-rouge">BinaryFloatOrVoid</code>, will be a IEEE754 floating point type that matches the given storage, exponent, and mantissa bits, or <code class="highlighter-rouge">void</code> if the search fails.</p>
+<p>The following code defines <code class="highlighter-rouge">BinaryFloatOrVoid</code> type using
+<code class="highlighter-rouge">decltype(find_type&lt;...&gt;())</code>. The newly defined type, <code class="highlighter-rouge">BinaryFloatOrVoid</code>, will
+be a IEEE754 floating point type that matches the given storage, exponent, and
+mantissa bits, or <code class="highlighter-rouge">void</code> if the search fails.</p>
 
 <div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 <span class="k">template</span> <span class="o">&lt;</span><span class="kt">int</span> <span class="n">storage_bits</span><span class="p">,</span>
@@ -166,9 +232,17 @@ if(!(window.doNotTrack === "1" || navigator.doNotTrack === "1" || navigator.doNo
              <span class="kt">float</span><span class="p">,</span> <span class="kt">double</span><span class="p">,</span> <span class="kt">long</span> <span class="kt">double</span><span class="o">&gt;</span><span class="p">());</span>
 </code></pre></div></div>
 
-<p><code class="highlighter-rouge">standard_binary_interchange_format_exponent_bits()</code> and <code class="highlighter-rouge">standard_binary_interchange_format_mantissa_bits()</code> functions just return the number of standard exponent and mantissa bits respectively, and we set them as the default values for <code class="highlighter-rouge">exponent_bits</code> and <code class="highlighter-rouge">mantissa_bits</code> for convenience. I will omit their actual implementations as it’s pretty straightforward and uninteresting.</p>
+<p><code class="highlighter-rouge">standard_binary_interchange_format_exponent_bits()</code> and
+<code class="highlighter-rouge">standard_binary_interchange_format_mantissa_bits()</code> functions just return the
+number of standard exponent and mantissa bits respectively, and we set them as
+the default values for <code class="highlighter-rouge">exponent_bits</code> and <code class="highlighter-rouge">mantissa_bits</code> for convenience. I
+will omit their actual implementations as it’s pretty straightforward and
+uninteresting.</p>
 
-<p>Traditionally, before <code class="highlighter-rouge">if constexpr</code> was available in C++17, this kind of compile time type manipulation was implemented with <a href="https://en.wikipedia.org/wiki/Substitution_failure_is_not_an_error">SFINAE</a>. The following code shows how it can be done in that way.</p>
+<p>Traditionally, before <code class="highlighter-rouge">if constexpr</code> was available in C++17, this kind of
+compile time type manipulation was implemented with
+<a href="https://en.wikipedia.org/wiki/Substitution_failure_is_not_an_error">SFINAE</a>.
+The following code shows how it can be done in that way.</p>
 
 <div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Recursion termination.  Type not found.</span>
 <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">C</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">Ts</span><span class="o">&gt;</span>
@@ -197,9 +271,13 @@ if(!(window.doNotTrack === "1" || navigator.doNotTrack === "1" || navigator.doNo
     <span class="kt">float</span><span class="p">,</span> <span class="kt">double</span><span class="p">,</span> <span class="kt">long</span> <span class="kt">double</span><span class="o">&gt;::</span><span class="n">type</span><span class="p">;</span>
 </code></pre></div></div>
 
-<p>Clearly, the <code class="highlighter-rouge">if constexpr</code> version is simpler and a lot more readable, and I expect to see less of the SFINAE mess thanks to <code class="highlighter-rouge">if constexpr</code> (and hopefully <a href="https://en.wikipedia.org/wiki/Concepts_(C%2B%2B)">concepts</a>) in the future.</p>
+<p>Clearly, the <code class="highlighter-rouge">if constexpr</code> version is simpler and a lot more readable, and I
+expect to see less of the SFINAE mess thanks to <code class="highlighter-rouge">if constexpr</code> (and hopefully
+<a href="https://en.wikipedia.org/wiki/Concepts_(C%2B%2B)">concepts</a>) in the future.</p>
 
-<p>Lastly, we introduce another type layer to cause a compile error with a nice error message, in case the requested type is not available, i.e., <code class="highlighter-rouge">BinaryFloatOrVoid</code> is <code class="highlighter-rouge">void</code>.</p>
+<p>Lastly, we introduce another type layer to cause a compile error with a nice
+error message, in case the requested type is not available, i.e.,
+<code class="highlighter-rouge">BinaryFloatOrVoid</code> is <code class="highlighter-rouge">void</code>.</p>
 
 <div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
 <span class="k">struct</span> <span class="n">AssertTypeFound</span> <span class="p">{</span>
@@ -214,9 +292,11 @@ if(!(window.doNotTrack === "1" || navigator.doNotTrack === "1" || navigator.doNo
     <span class="n">BinaryFloatOrVoid</span><span class="o">&lt;</span><span class="n">storage_bits</span><span class="o">&gt;&gt;::</span><span class="n">type</span><span class="p">;</span>
 </code></pre></div></div>
 
-<p>OK, finally, we have constructed the type <code class="highlighter-rouge">IEEE_754_2008_Binary&lt;n&gt;</code> that guarantees IEEE 754 standard binary interchange format. Yay!</p>
+<p>OK, finally, we have constructed the type <code class="highlighter-rouge">IEEE_754_2008_Binary&lt;n&gt;</code> that
+guarantees IEEE 754 standard binary interchange format. Yay!</p>
 
-<p>So are we done now? Not quite, there is one last step that every programmer loves: writing tests. :)</p>
+<p>So are we done now? Not quite, there is one last step that every programmer
+loves: writing tests. :)</p>
 
 <div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="kt">int</span> <span class="n">storage_bits</span><span class="p">,</span> <span class="kt">int</span> <span class="n">exponent_bits</span><span class="p">,</span> <span class="kt">int</span> <span class="n">mantissa_bits</span><span class="o">&gt;</span>
 <span class="kt">void</span> <span class="n">test_if_type_exists</span><span class="p">()</span> <span class="p">{</span>
@@ -243,9 +323,13 @@ if(!(window.doNotTrack === "1" || navigator.doNotTrack === "1" || navigator.doNo
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>Again, all the checks are done at compile time, <code class="highlighter-rouge">static_assert</code>, so we don’t need to call <code class="highlighter-rouge">test()</code>, and just have to ensure that <code class="highlighter-rouge">test_if_type_exists</code> functions are instantiated. If a type doesn’t exists (i.e., 16 and 128 size types in most systems) then <code class="highlighter-rouge">if constexpr</code> will simply discard the checks.</p>
+<p>Again, all the checks are done at compile time, <code class="highlighter-rouge">static_assert</code>, so we don’t
+need to call <code class="highlighter-rouge">test()</code>, and just have to ensure that <code class="highlighter-rouge">test_if_type_exists</code>
+functions are instantiated. If a type doesn’t exists (i.e., 16 and 128 size
+types in most systems) then <code class="highlighter-rouge">if constexpr</code> will simply discard the checks.</p>
 
-<p>I hope you had fun, like I did. The full implementation is available in this repository <a href="https://github.com/kkimdev/ieee754-types">https://github.com/kkimdev/ieee754-types</a> .</p>
+<p>I hope you had fun, like I did. The full implementation is available in this
+repository <a href="https://github.com/kkimdev/ieee754-types">https://github.com/kkimdev/ieee754-types</a> .</p>
 
   </div><a class="u-url" href="/posts/2018/06/15/IEEE-754-Floating-Point-Type-in-C++.html" hidden></a>
 </article>

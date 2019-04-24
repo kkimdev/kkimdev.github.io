@@ -57,9 +57,9 @@ if(!(window.doNotTrack === "1" || navigator.doNotTrack === "1" || navigator.doNo
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
-    <p>In this post, I will explain why Rust is interesting by making an
-analogy between “dynamic vs static typing” and “C++ vs Rust’s static memory
-validation” without going into too much detail.</p>
+    <p>In this post, I will explain why Rust is interesting by making an analogy
+between “dynamic vs static typing” and “C++ vs Rust’s static memory validation”
+without going into too much detail.</p>
 
 <h1 id="preventing-type-errors-at-compile-time">Preventing type errors at compile time</h1>
 
@@ -99,13 +99,16 @@ validation” without going into too much detail.</p>
   <li>Better than (certain) comments: compiler keeps you honest</li>
 </ul>
 
-<p>In fact, all popular dynamic languages have static typing projects, often
-backed by big corporations as the benefit of static typing becomes more
-significant for larger projects.</p>
+<p>In fact, all popular dynamic languages have static typing projects, often backed
+by big corporations as the benefit of static typing becomes more significant for
+larger projects.</p>
 
 <ul>
-  <li>Python: <a href="https://www.python.org/dev/peps/pep-0484/">PEP 484 Type Hints</a>, <a href="http://mypy-lang.org/index.html">Dropbox Mypy</a></li>
-  <li>Javascript: <a href="https://www.typescriptlang.org/">Microsoft Typescript</a>, <a href="https://developers.google.com/closure/compiler/">Google Closure</a>, <a href="https://flow.org/">Facebook Flow</a></li>
+  <li>Python: <a href="https://www.python.org/dev/peps/pep-0484/">PEP 484 Type Hints</a>,
+<a href="http://mypy-lang.org/index.html">Dropbox Mypy</a></li>
+  <li>Javascript: <a href="https://www.typescriptlang.org/">Microsoft Typescript</a>,
+<a href="https://developers.google.com/closure/compiler/">Google Closure</a>,
+<a href="https://flow.org/">Facebook Flow</a></li>
   <li>Ruby: <a href="https://sorbet.org/">Stripe Sorbet</a></li>
   <li>PHP: <a href="https://hacklang.org/">Facebook Hack</a></li>
   <li>Lua: <a href="https://github.com/dibyendumajumdar/ravi">Ravi</a></li>
@@ -113,16 +116,15 @@ significant for larger projects.</p>
 
 <h1 id="preventing-memory-errors-at-compile-time">Preventing memory errors at compile time</h1>
 
-<p>Since memory safety in C++ is a major practical issue, it would be great if
-we can validate them at compile time in a similar manner that static typing
-does.</p>
+<p>Since memory safety in C++ is a major practical issue, it would be great if we
+can validate them statically in a similar manner that static typing does.</p>
 
-<p>Yes, this was one of the main motivations behind the creation of Rust.
-Just like C++ compiler tracks type information for each variable, Rust compiler
-tracks ownership, lifetime, and aliasing for each variable in addition.</p>
+<p>Yes, this was one of the main motivations behind the creation of Rust. Just like
+C++ compiler tracks type information for each variable, Rust compiler tracks
+ownership, lifetime, and aliasing for each variable in addition.</p>
 
-<p>Here is a small list of memory issues that can be validated at compile time
-with Rust.</p>
+<p>Here is a small list of memory issues that can be validated statically with
+Rust.</p>
 
 <h4 id="using-uninitialized-variable">Using uninitialized variable</h4>
 
@@ -286,7 +288,7 @@ with Rust.</p>
         <span class="c">//   |     MONEY += 1;</span>
         <span class="c">//   |     ^^^^^^^^^^ use of mutable static</span>
         <span class="c">//   |</span>
-        <span class="c">//   = note: mutable statics can be mutated by multiple threads: aliasing violations or data   races will cause undefined behavior</span>
+        <span class="c">//   = note: mutable statics can be mutated by multiple threads: aliasing violations or data races will cause undefined behavior</span>
     <span class="p">}</span>
 <span class="p">}</span>
 
@@ -308,8 +310,8 @@ with Rust.</p>
   </li>
 </ul>
 
-<p>To make these compile time memory checks possible, Rust enforces single mutable
-ownership or multiple readonly aliases at a time. In fact, they are very good
+<p>To make these static memory checks possible, Rust enforces single mutable
+ownership or multiple read-only aliases at a time. In fact, they are very good
 idioms to structure large codebase anyways, and normally they do not get in the
 way for ordinary applications. For libraries that require fine-grained memory
 control like data containers, e.g., vector, list, and hash map,
@@ -317,23 +319,26 @@ control like data containers, e.g., vector, list, and hash map,
 available to bypass the restrictions.</p>
 
 <p>To be fair, there are compiler options or external tools that we can use to
-detect C++ memory issues, but it’s nowhere close to the completeness of
-Rust due to the implementation complexity and the inherent language spec
-limitations.</p>
+detect C++ memory issues, but it’s nowhere close to the completeness of Rust due
+to the implementation complexity and the inherent language spec limitations.</p>
+
 <ul>
-  <li><code class="highlighter-rouge">-Wall -Wextra</code> compiler options: Even for the above trivial examples,
-GCC 8.3 and Clang 8.0 could only detect the one case, uninitialized
-variable, out of the five cases.</li>
+  <li><code class="highlighter-rouge">-Wall -Wextra</code> compiler options: Even for the above trivial examples, GCC 8.3
+and Clang 8.0 could only detect the one case, uninitialized variable, out of
+the five cases.</li>
   <li>External tools, e.g., Valgrind, Address/Memory/Thread Sanitizers: They are
-great tools.  However in practice, being able to detect at compile time vs
+great tools. However in practice, being able to detect at compile time vs
 runtime is a big difference as the detection is limited to the specific test
-cases that we have.  Otherwise, there would be no need for static typing for
+cases that we have. Otherwise, there would be no need for static typing for
 correctness as we can run tests to catch the type errors.</li>
 </ul>
 
 <h1 id="how-rust-is-received">How Rust is received</h1>
 
-<p>Rust has been consistently ranked #1 in <a href="https://insights.stackoverflow.com/survey/2019#technology-_-most-loved-dreaded-and-wanted-languages">Stack Overflow developer survey’s most loved programming languages category</a> for 4 years in a row, followed by Python #2, Typescript #3, and Kotlin #4 in 2019.</p>
+<p>Rust has been consistently ranked #1 in
+<a href="https://insights.stackoverflow.com/survey/2019#technology-_-most-loved-dreaded-and-wanted-languages">Stack Overflow developer survey’s most loved programming languages category</a>
+for 4 years in a row, followed by Python #2, Typescript #3, and Kotlin #4
+in 2019.</p>
 
 <p>Also, it got favorable comments from some of the highly regarded C/C++
 programmers:</p>
