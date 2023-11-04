@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkkkimdev=self.webpackChunkkkimdev||[]).push([[237],{6489:(e,k,u)=>{u.r(k),u.d(k,{default:()=>l});var s=u(8903),t=u(1527);function l(){return(0,t.jsx)(s.l_,{to:"/blog"})}}}]);
